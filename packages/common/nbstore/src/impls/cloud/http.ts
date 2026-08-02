@@ -28,6 +28,7 @@ export class HttpConnection extends DummyConnection {
 
     const res = await globalThis
       .fetch(new URL(input, this.serverBaseUrl), {
+        credentials: 'include',
         ...init,
         signal: abortController.signal,
         headers: {

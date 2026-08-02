@@ -14,6 +14,7 @@ import { GlobalDialogService } from '@affine/core/modules/dialogs';
 import { useLiveData, useService } from '@toeverything/infra';
 import { useCallback } from 'react';
 
+import { navigateSisoHost, useSisoHostUser } from '../../../siso-bridge';
 import { Account } from './account';
 import { AccountMenu } from './account-menu';
 import { AIUsage } from './ai-usage';
@@ -25,6 +26,22 @@ import { UnknownUserIcon } from './unknow-user';
 export default function UserInfo() {
   const session = useService(AuthService).session;
   const account = useLiveData(session.account$);
+  const sisoUser = useSisoHostUser();
+  if (sisoUser) {
+    return (
+      <IconButton
+        data-testid="sidebar-siso-user-avatar"
+        variant="plain"
+        size="20"
+        style={{ padding: 0 }}
+        withoutHover
+        title={`${sisoUser.name} · ${sisoUser.email}`}
+        onClick={() => navigateSisoHost('/settings?tab=profile')}
+      >
+        <Avatar size={20} name={sisoUser.name} />
+      </IconButton>
+    );
+  }
   return account ? (
     <AuthorizedUserInfo account={account} />
   ) : (
@@ -55,6 +72,7 @@ const UnauthorizedUserInfo = () => {
   const globalDialogService = useService(GlobalDialogService);
 
   const openSignInModal = useCallback(() => {
+    if (navigateSisoHost('/settings?tab=profile')) return;
     globalDialogService.open('sign-in', {});
   }, [globalDialogService]);
 

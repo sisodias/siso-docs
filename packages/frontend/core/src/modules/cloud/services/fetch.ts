@@ -54,6 +54,7 @@ export class FetchService extends Service {
       res = await globalThis.fetch(
         new URL(input, this.serverService.server.serverMetadata.baseUrl),
         {
+          credentials: 'include',
           ...init,
           signal: abortController.signal,
           headers: {

@@ -206,6 +206,7 @@ class SocketManager {
       autoConnect: false,
       transports: isSelfHosted ? ['polling', 'websocket'] : ['websocket'], // self-hosted server may not support websocket
       secure: new URL(endpoint).protocol === 'https:',
+      withCredentials: true,
       // we will handle reconnection by ourselves
       reconnection: false,
     });

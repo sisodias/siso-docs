@@ -1,7 +1,6 @@
 // Import is already correct, no changes needed
 import {
   AddPageButton,
-  AppDownloadButton,
   AppSidebar,
   MenuItem,
   MenuLinkItem,
@@ -9,7 +8,6 @@ import {
   SidebarContainer,
   SidebarScrollableContainer,
 } from '@affine/core/modules/app-sidebar/views';
-import { ExternalMenuLinkItem } from '@affine/core/modules/app-sidebar/views/menu-item/external-menu-link-item';
 import { AuthService, ServerService } from '@affine/core/modules/cloud';
 import { WorkspaceDialogService } from '@affine/core/modules/dialogs';
 import { FeatureFlagService } from '@affine/core/modules/feature-flag';
@@ -22,12 +20,11 @@ import {
   AiOutlineIcon,
   AllDocsIcon,
   ImportIcon,
-  JournalIcon,
   SettingsIcon,
 } from '@blocksuite/icons/rc';
 import { useLiveData, useService, useServices } from '@toeverything/infra';
 import type { ReactElement } from 'react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useEffect } from 'react';
 
 import {
   CollapsibleSection,
@@ -38,6 +35,11 @@ import {
   NavigationPanelTags,
 } from '../../desktop/components/navigation-panel';
 import { WorkbenchService } from '../../modules/workbench';
+import {
+  getSisoEmbedConfig,
+  isSisoHostMessage,
+  navigateSisoHost,
+} from '../../siso-bridge';
 import { WorkspaceNavigator } from '../workspace-selector';
 import {
   bottomContainer,
@@ -146,12 +148,28 @@ export const RootAppSidebar = memo((): ReactElement => {
     [workbench]
   );
 
-  const onOpenSettingModal = useCallback(() => {
+  const openNativeSettingModal = useCallback(() => {
     workspaceDialogService.open('setting', {
       activeTab: 'appearance',
     });
     track.$.navigationPanel.$.openSettings();
   }, [workspaceDialogService]);
+
+  const onOpenSettingModal = useCallback(() => {
+    if (navigateSisoHost('/settings?tab=docs')) return;
+    openNativeSettingModal();
+  }, [openNativeSettingModal]);
+
+  useEffect(() => {
+    const { embedded, hostOrigin } = getSisoEmbedConfig();
+    if (!embedded || !hostOrigin) return;
+    const onMessage = (event: MessageEvent) => {
+      if (!isSisoHostMessage(event, hostOrigin)) return;
+      if (event.data.type === 'siso:open-settings') openNativeSettingModal();
+    };
+    window.addEventListener('message', onMessage);
+    return () => window.removeEventListener('message', onMessage);
+  }, [openNativeSettingModal]);
 
   const handleOpenDocs = useCallback(
     (result: {
@@ -193,7 +211,6 @@ export const RootAppSidebar = memo((): ReactElement => {
         <div className={workspaceAndUserWrapper}>
           <div className={workspaceWrapper}>
             <WorkspaceNavigator
-              showEnableCloudButton
               showSyncStatus
               open={workspaceSelectorOpen}
               onOpenChange={onWorkspaceSelectorOpenChange}
@@ -246,16 +263,11 @@ export const RootAppSidebar = memo((): ReactElement => {
           </MenuItem>
           <InviteMembersButton />
           <TemplateDocEntrance />
-          <ExternalMenuLinkItem
-            href="https://affine.pro/blog?tag=Release+Note"
-            icon={<JournalIcon />}
-            label={t['com.affine.app-sidebar.learn-more']()}
-          />
         </CollapsibleSection>
       </SidebarScrollableContainer>
       <SidebarContainer className={bottomContainer}>
         <SidebarAudioPlayer />
-        {BUILD_CONFIG.isElectron ? <UpdaterButton /> : <AppDownloadButton />}
+        {BUILD_CONFIG.isElectron ? <UpdaterButton /> : null}
       </SidebarContainer>
     </AppSidebar>
   );

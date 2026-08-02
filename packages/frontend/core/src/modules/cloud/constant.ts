@@ -6,6 +6,7 @@ import {
 
 import { DEFAULT_SELF_HOSTED_SERVER_NAME } from './server-name';
 import type { ServerConfig, ServerMetadata } from './types';
+import { getSisoDocsServerOrigin } from '../../siso-bridge';
 
 export const BUILD_IN_SERVERS: (ServerMetadata & { config: ServerConfig })[] =
   environment.isSelfHosted
@@ -36,7 +37,7 @@ export const BUILD_IN_SERVERS: (ServerMetadata & { config: ServerConfig })[] =
             id: 'affine-cloud',
             baseUrl: BUILD_CONFIG.isElectron
               ? 'http://localhost:8080'
-              : location.origin,
+              : (getSisoDocsServerOrigin() ?? location.origin),
             config: {
               serverName: 'AFFiNE Cloud',
               features: [

@@ -104,9 +104,8 @@ export class ServerConfigStore extends Store {
     abortSignal?: AbortSignal
   ): Promise<ServerConfigType> {
     try {
-      const gql = gqlFetcherFactory(
-        `${serverBaseUrl}/graphql`,
-        globalThis.fetch
+      const gql = gqlFetcherFactory(`${serverBaseUrl}/graphql`, (input, init) =>
+        globalThis.fetch(input, { ...init, credentials: 'include' })
       );
       const serverConfigData = await gql({
         query: serverConfigQuery,
