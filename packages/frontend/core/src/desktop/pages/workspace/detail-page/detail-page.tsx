@@ -62,6 +62,7 @@ import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import type { Subscription } from 'rxjs';
 
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
 import { PageNotFound } from '../../404';
 import * as styles from './detail-page.css';
 import { DetailPageHeader } from './detail-page-header';
@@ -367,7 +368,7 @@ const DetailPageImpl = memo(function DetailPageImpl() {
         </div>
       </ViewBody>
 
-      {enableAI && (
+      {enableAI && !getSisoEmbedConfig().embedded && (
         <ViewSidebarTab
           tabId="chat"
           icon={<AiIcon />}

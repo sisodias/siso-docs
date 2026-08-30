@@ -3,7 +3,8 @@ import type { SettingTab } from '@affine/core/modules/dialogs/constant';
 import { WorkbenchService } from '@affine/core/modules/workbench';
 import { useService } from '@toeverything/infra';
 import { useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
 
 export const Component = () => {
   const workbenchService = useService(WorkbenchService);
@@ -15,8 +16,10 @@ export const Component = () => {
   const scrollAnchor = searchParams.get('scrollAnchor') ?? undefined;
 
   const isOpened = useRef(false);
+  const { embedded } = getSisoEmbedConfig();
 
   useEffect(() => {
+    if (embedded) return;
     if (isOpened.current) {
       return;
     }
@@ -26,6 +29,10 @@ export const Component = () => {
       activeTab: tab as SettingTab,
       scrollAnchor,
     });
-  }, [scrollAnchor, tab, workbench, workspaceDialogService]);
+  }, [embedded, scrollAnchor, tab, workbench, workspaceDialogService]);
+
+  if (embedded) {
+    return <Navigate to="/all" replace />;
+  }
   return null;
 };

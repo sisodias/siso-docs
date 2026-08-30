@@ -72,6 +72,16 @@ export const navHeaderStyle = style({
   justifyContent: 'space-between',
   alignItems: 'center',
 });
+export const embeddedHeaderContent = style({
+  display: 'flex',
+  alignItems: 'center',
+  gap: 8,
+  width: '100%',
+});
+export const embeddedWorkspace = style({
+  minWidth: 0,
+  flex: 1,
+});
 
 export const navBodyStyle = style({
   flex: '1 1 auto',

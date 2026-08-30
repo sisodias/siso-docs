@@ -23,6 +23,7 @@ import {
 } from 'react';
 
 import * as styles from './styles.css';
+import { getSisoEmbedConfig } from '../../../siso-bridge';
 
 export const AppContainer = ({
   children,
@@ -92,11 +93,19 @@ const BrowserLayout = ({
 }: PropsWithChildren<{ fallback?: boolean }>) => {
   const workspaceService = useServiceOptional(WorkspaceService);
   const isInWorkspace = !!workspaceService;
+  const { embedded } = getSisoEmbedConfig();
+  const appSidebarService = useService(AppSidebarService).sidebar;
+  const sidebarOpen = useLiveData(appSidebarService.open$);
 
   return (
     <div className={styles.browserAppViewContainer}>
-      <OpenInAppCard />
+      {!embedded && <OpenInAppCard />}
       {fallback ? <AppSidebarFallback /> : isInWorkspace && <RootAppSidebar />}
+      {embedded && isInWorkspace && !sidebarOpen && (
+        <div className={styles.embeddedSidebarRestore}>
+          <SidebarSwitch show />
+        </div>
+      )}
       <MainContainer>{children}</MainContainer>
     </div>
   );

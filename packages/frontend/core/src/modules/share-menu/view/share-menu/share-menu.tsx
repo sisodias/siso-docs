@@ -24,6 +24,7 @@ import {
 
 import * as styles from './index.css';
 import { InviteMemberEditor } from './invite-member-editor/invite-member-editor';
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
 import { MemberManagement } from './member-management';
 import { ShareExport } from './share-export';
 import { SharePage } from './share-page';
@@ -48,6 +49,7 @@ export enum ShareMenuTab {
 
 export const ShareMenuContent = (props: ShareMenuProps) => {
   const t = useI18n();
+  const embedded = getSisoEmbedConfig().embedded;
   const [currentTab, setCurrentTab] = useState(ShareMenuTab.Share);
 
   const serverService = useService(ServerService);
@@ -122,7 +124,7 @@ export const ShareMenuContent = (props: ShareMenuProps) => {
     });
   }, [isOwner, onConfirm, openConfirmModal, t]);
 
-  if (currentTab === ShareMenuTab.Members) {
+  if (!embedded && currentTab === ShareMenuTab.Members) {
     return (
       <MemberManagement
         openPaywallModal={openPaywallModal}
@@ -136,7 +138,7 @@ export const ShareMenuContent = (props: ShareMenuProps) => {
       />
     );
   }
-  if (currentTab === ShareMenuTab.Invite) {
+  if (!embedded && currentTab === ShareMenuTab.Invite) {
     return (
       <InviteMemberEditor
         openPaywallModal={openPaywallModal}
@@ -182,10 +184,10 @@ export const ShareMenuContent = (props: ShareMenuProps) => {
             hittingPaywall={!!hittingPaywall}
             openPaywallModal={openPaywallModal}
             onClickInvite={() => {
-              setCurrentTab(ShareMenuTab.Invite);
+              if (!embedded) setCurrentTab(ShareMenuTab.Invite);
             }}
             onClickMembers={() => {
-              setCurrentTab(ShareMenuTab.Members);
+              if (!embedded) setCurrentTab(ShareMenuTab.Members);
             }}
             {...props}
           />

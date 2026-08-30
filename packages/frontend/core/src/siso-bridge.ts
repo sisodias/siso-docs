@@ -9,17 +9,72 @@ export interface SisoHostUser {
 
 type SisoHostMessage =
   | { type: 'siso:session'; user: SisoHostUser }
-  | { type: 'siso:open-settings' };
+  | { type: 'siso:open-settings' }
+  | { type: 'siso:open-search' };
+
+const EMBED_CONFIG_STORAGE_KEY = 'siso:embedded-config';
+
+type SisoEmbedConfig = {
+  embedded: boolean;
+  hostOrigin: string | null;
+  mode: string | null;
+  serverOrigin: string | null;
+};
+
+const readStoredEmbedConfig = (): SisoEmbedConfig | null => {
+  try {
+    const value = globalThis.sessionStorage?.getItem(EMBED_CONFIG_STORAGE_KEY);
+    if (!value) return null;
+    const config = JSON.parse(value) as SisoEmbedConfig;
+    return config.embedded && config.hostOrigin ? config : null;
+  } catch {
+    return null;
+  }
+};
+
+const storeEmbedConfig = (config: SisoEmbedConfig) => {
+  try {
+    if (config.embedded && config.hostOrigin) {
+      globalThis.sessionStorage?.setItem(
+        EMBED_CONFIG_STORAGE_KEY,
+        JSON.stringify(config)
+      );
+    } else {
+      globalThis.sessionStorage?.removeItem(EMBED_CONFIG_STORAGE_KEY);
+    }
+  } catch {
+    // Storage can be unavailable in restricted browsing contexts.
+  }
+};
+
+const getTrustedOrigin = (value: string | null) => {
+  if (!value || !URL.canParse(value)) return null;
+  const parsed = new URL(value);
+  return ['http:', 'https:'].includes(parsed.protocol) ? parsed.origin : null;
+};
 
 export function getSisoEmbedConfig(url = window.location.href) {
   const parsed = new URL(url);
-  const hostOrigin = parsed.searchParams.get('siso_host_origin');
-  return {
+  const hasExplicitContract = [
+    'siso_embedded',
+    'siso_host_origin',
+    'siso_mode',
+    'siso_server_origin',
+  ].some(key => parsed.searchParams.has(key));
+  const hostOrigin = getTrustedOrigin(
+    parsed.searchParams.get('siso_host_origin')
+  );
+  const config: SisoEmbedConfig = {
     embedded: parsed.searchParams.get('siso_embedded') === '1' && !!hostOrigin,
     hostOrigin,
     mode: parsed.searchParams.get('siso_mode'),
     serverOrigin: parsed.searchParams.get('siso_server_origin'),
   };
+  if (hasExplicitContract) {
+    storeEmbedConfig(config);
+    return config;
+  }
+  return readStoredEmbedConfig() ?? config;
 }
 
 export function getSisoDocsServerOrigin(url = window.location.href) {

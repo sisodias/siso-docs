@@ -4,6 +4,7 @@ import { CloseIcon, DownloadIcon } from '@blocksuite/icons/rc';
 import clsx from 'clsx';
 import { useCallback, useState } from 'react';
 
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
 import * as styles from './index.css';
 
 export function AppDownloadButton({
@@ -26,7 +27,7 @@ export function AppDownloadButton({
     open(url, '_blank');
   }, []);
 
-  if (!show) {
+  if (!show || getSisoEmbedConfig().embedded) {
     return null;
   }
   return (

@@ -133,6 +133,7 @@ export const RootAppSidebar = memo((): ReactElement => {
   );
 
   const sessionStatus = useLiveData(authService.session.status$);
+  const { embedded } = getSisoEmbedConfig();
   const t = useI18n();
   const workspaceDialogService = useService(WorkspaceDialogService);
   const workbench = workbenchService.workbench;
@@ -165,11 +166,16 @@ export const RootAppSidebar = memo((): ReactElement => {
     if (!embedded || !hostOrigin) return;
     const onMessage = (event: MessageEvent) => {
       if (!isSisoHostMessage(event, hostOrigin)) return;
-      if (event.data.type === 'siso:open-settings') openNativeSettingModal();
+      if (event.data.type === 'siso:open-settings') {
+        navigateSisoHost('/settings?tab=docs');
+      }
+      if (event.data.type === 'siso:open-search') {
+        cMDKQuickSearchService.toggle();
+      }
     };
     window.addEventListener('message', onMessage);
     return () => window.removeEventListener('message', onMessage);
-  }, [openNativeSettingModal]);
+  }, [cMDKQuickSearchService, openNativeSettingModal]);
 
   const handleOpenDocs = useCallback(
     (result: {
@@ -208,39 +214,47 @@ export const RootAppSidebar = memo((): ReactElement => {
   return (
     <AppSidebar>
       <SidebarContainer>
-        <div className={workspaceAndUserWrapper}>
-          <div className={workspaceWrapper}>
-            <WorkspaceNavigator
-              showSyncStatus
-              open={workspaceSelectorOpen}
-              onOpenChange={onWorkspaceSelectorOpenChange}
-              dense
-            />
-          </div>
-          <UserInfo />
-        </div>
-        <div className={quickSearchAndNewPage}>
-          <QuickSearchInput
-            className={quickSearch}
-            data-testid="slider-bar-quick-search-button"
-            data-event-props="$.navigationPanel.$.quickSearch"
-            onClick={onOpenQuickSearchModal}
-          />
-          <AddPageButton />
-        </div>
+        {!embedded && (
+          <>
+            <div className={workspaceAndUserWrapper}>
+              <div className={workspaceWrapper}>
+                <WorkspaceNavigator
+                  showSyncStatus
+                  open={workspaceSelectorOpen}
+                  onOpenChange={onWorkspaceSelectorOpenChange}
+                  dense
+                />
+              </div>
+              <UserInfo />
+            </div>
+            <div className={quickSearchAndNewPage}>
+              <QuickSearchInput
+                className={quickSearch}
+                data-testid="slider-bar-quick-search-button"
+                data-event-props="$.navigationPanel.$.quickSearch"
+                onClick={onOpenQuickSearchModal}
+              />
+              <AddPageButton />
+            </div>
+          </>
+        )}
         <AllDocsButton />
         <AppSidebarJournalButton />
-        {sessionStatus === 'authenticated' && <NotificationButton />}
-        <AIChatButton />
-        <MenuItem
-          data-testid="slider-bar-workspace-setting-button"
-          icon={<SettingsIcon />}
-          onClick={onOpenSettingModal}
-        >
-          <span data-testid="settings-modal-trigger">
-            {t['com.affine.settingSidebar.title']()}
-          </span>
-        </MenuItem>
+        {!embedded && sessionStatus === 'authenticated' && (
+          <NotificationButton />
+        )}
+        {!embedded && <AIChatButton />}
+        {!embedded && (
+          <MenuItem
+            data-testid="slider-bar-workspace-setting-button"
+            icon={<SettingsIcon />}
+            onClick={onOpenSettingModal}
+          >
+            <span data-testid="settings-modal-trigger">
+              {t['com.affine.settingSidebar.title']()}
+            </span>
+          </MenuItem>
+        )}
       </SidebarContainer>
       <SidebarScrollableContainer>
         <NavigationPanelFavorites />
@@ -261,7 +275,7 @@ export const RootAppSidebar = memo((): ReactElement => {
           >
             <span data-testid="import-modal-trigger">{t['Import']()}</span>
           </MenuItem>
-          <InviteMembersButton />
+          {!embedded && <InviteMembersButton />}
           <TemplateDocEntrance />
         </CollapsibleSection>
       </SidebarScrollableContainer>

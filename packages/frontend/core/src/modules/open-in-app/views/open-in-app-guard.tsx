@@ -1,6 +1,7 @@
 import { useLiveData, useService } from '@toeverything/infra';
 import { Fragment, useCallback, useEffect } from 'react';
 
+import { getSisoEmbedConfig } from '../../../siso-bridge';
 import { OpenInAppService } from '../services';
 import { OpenInAppPage } from './open-in-app-page';
 
@@ -13,10 +14,12 @@ const WebOpenInAppGuard = ({ children }: { children: React.ReactNode }) => {
   }
   const service = useService(OpenInAppService);
   const shouldOpenInApp = useLiveData(service.showOpenInAppPage$);
+  const embedded = getSisoEmbedConfig().embedded;
 
   useEffect(() => {
+    if (embedded) return;
     service?.bootstrap();
-  }, [service]);
+  }, [embedded, service]);
 
   const onOpenHere = useCallback(
     (e: React.MouseEvent) => {
@@ -25,6 +28,10 @@ const WebOpenInAppGuard = ({ children }: { children: React.ReactNode }) => {
     },
     [service]
   );
+
+  if (embedded) {
+    return children;
+  }
 
   if (shouldOpenInApp === undefined) {
     return null;

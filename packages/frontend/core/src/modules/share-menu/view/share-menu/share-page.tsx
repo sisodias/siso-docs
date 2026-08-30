@@ -16,6 +16,7 @@ import * as styles from './index.css';
 import { InviteInput } from './invite-member-editor';
 import { MembersRow } from './member-management';
 import type { ShareMenuProps } from './share-menu';
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
 
 export const LocalSharePage = (props: ShareMenuProps) => {
   const t = useI18n();
@@ -93,8 +94,12 @@ export const AFFiNESharePage = (
     <div className={styles.content}>
       <div className={styles.columnContainerStyle}>
         <div className={styles.memberRowsStyle}>
-          {canManageUsers && <InviteInput onFocus={props.onClickInvite} />}
-          <MembersRow onClick={props.onClickMembers} />
+          {!getSisoEmbedConfig().embedded && canManageUsers && (
+            <InviteInput onFocus={props.onClickInvite} />
+          )}
+          {!getSisoEmbedConfig().embedded && (
+            <MembersRow onClick={props.onClickMembers} />
+          )}
         </div>
 
         <div className={styles.generalAccessStyle}>

@@ -14,10 +14,13 @@ import { WorkspaceService } from '@affine/core/modules/workspace';
 import { LiveData, useLiveData, useService } from '@toeverything/infra';
 import type { PropsWithChildren } from 'react';
 
+import { getSisoEmbedConfig } from '../../../../siso-bridge';
+
 export const WorkspaceLayout = function WorkspaceLayout({
   children,
 }: PropsWithChildren) {
   const currentWorkspace = useService(WorkspaceService).workspace;
+  const { embedded } = getSisoEmbedConfig();
   return (
     <SWRConfigProvider>
       <WorkspaceDialogs />
@@ -34,7 +37,7 @@ export const WorkspaceLayout = function WorkspaceLayout({
       <WorkspaceLayoutInner>{children}</WorkspaceLayoutInner>
       {/* should show after workspace loaded */}
       {/* FIXME: wait for better ai, <WorkspaceAIOnboarding /> */}
-      <AIIsland />
+      {!embedded && <AIIsland />}
       <uniReactRoot.Root />
     </SWRConfigProvider>
   );

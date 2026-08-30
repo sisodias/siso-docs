@@ -97,6 +97,27 @@ export const WorkspaceSelector = ({
     }
   }, [workspacesService, open]);
 
+  const workspaceCard = workspaceMetadata ? (
+    <WorkspaceCard
+      workspaceMetadata={workspaceMetadata}
+      onClick={disable ? undefined : openUserWorkspaceList}
+      showSyncStatus={showSyncStatus}
+      className={className}
+      showArrowDownIcon={showArrowDownIcon}
+      disable={disable}
+      hideCollaborationIcon={true}
+      hideTeamWorkspaceIcon={true}
+      data-testid="current-workspace-card"
+      dense={dense}
+      role={disable ? 'presentation' : 'button'}
+      tabIndex={disable ? -1 : 0}
+    />
+  ) : (
+    <span />
+  );
+
+  if (disable) return workspaceCard;
+
   return (
     <Menu
       rootOptions={{
@@ -125,22 +146,7 @@ export const WorkspaceSelector = ({
         },
       }}
     >
-      {workspaceMetadata ? (
-        <WorkspaceCard
-          workspaceMetadata={workspaceMetadata}
-          onClick={openUserWorkspaceList}
-          showSyncStatus={showSyncStatus}
-          className={className}
-          showArrowDownIcon={showArrowDownIcon}
-          disable={disable}
-          hideCollaborationIcon={true}
-          hideTeamWorkspaceIcon={true}
-          data-testid="current-workspace-card"
-          dense={dense}
-        />
-      ) : (
-        <span></span>
-      )}
+      {workspaceCard}
     </Menu>
   );
 };

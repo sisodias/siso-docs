@@ -71,6 +71,18 @@ export const desktopTabsHeader = style({
   width: '100%',
   overflow: 'hidden',
 });
+export const embeddedSidebarRestore = style({
+  position: 'absolute',
+  top: 8,
+  left: 8,
+  zIndex: 10,
+  display: 'flex',
+  alignItems: 'center',
+  height: 36,
+  padding: '0 8px',
+  borderRadius: 8,
+  backgroundColor: cssVar('backgroundPrimaryColor'),
+});
 
 export const mainContainerStyle = style({
   position: 'relative',

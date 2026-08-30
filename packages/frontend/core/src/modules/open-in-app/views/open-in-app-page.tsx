@@ -7,6 +7,7 @@ import { useServiceOptional } from '@toeverything/infra';
 import type { MouseEvent } from 'react';
 import { useCallback } from 'react';
 
+import { getSisoEmbedConfig } from '../../../siso-bridge';
 import { getOpenUrlInDesktopAppLink } from '../utils';
 import * as styles from './open-in-app-page.css';
 
@@ -26,6 +27,10 @@ export const OpenInAppPage = ({
   openHereClicked,
   mode = 'auth',
 }: OpenAppProps) => {
+  if (getSisoEmbedConfig().embedded) {
+    return null;
+  }
+
   // default to open the current page in desktop app
   urlToOpen ??= getOpenUrlInDesktopAppLink(window.location.href, true);
   const workspaceDialogService = useServiceOptional(WorkspaceDialogService);

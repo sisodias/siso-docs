@@ -47,6 +47,7 @@ import {
 import { useCallback, useState } from 'react';
 
 import { HeaderDropDownButton } from '../../../components/pure/header-drop-down-button';
+import { getSisoEmbedConfig } from '../../../siso-bridge';
 import { useFavorite } from '../favorite';
 import { HistoryTipsModal } from './history-tips-modal';
 import { shareMenu } from './style.css';
@@ -447,7 +448,9 @@ const PageHeaderMenuItem = ({
         onSelect={handleOpenTrashModal}
         disabled={!canMoveToTrash}
       />
-      {BUILD_CONFIG.isWeb && workspace.flavour !== 'local' ? (
+      {BUILD_CONFIG.isWeb &&
+      workspace.flavour !== 'local' &&
+      !getSisoEmbedConfig().embedded ? (
         <MenuItem
           prefixIcon={<LocalWorkspaceIcon />}
           data-testid="editor-option-menu-link"
